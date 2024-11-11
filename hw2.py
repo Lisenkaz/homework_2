@@ -46,7 +46,31 @@ class DependencyVisualizer:  # Определение класса DependencyVis
         return dependencies  # Возврат собранного словаря зависимостей.
     # Метод для создания графа.
     def generate_graph(self, dependencies, depth=0):
-
+        graph = "digraph G {\n"  # Инициализация строки для графа в формате DOT.
+        edges = {}  # Словарь для хранения зависимостей
+        # Итерация по всем зависимостям
+        for dep, version in dependencies.items():
+            # Добавление узла для каждой зависимости 
+            graph += f'    "{dep}.{version}";\n'
+            # Инициализация списка подзависимостей для текущей зависимости
+            edges[dep] = []
+            if depth < self.max_depth:
+            # Путь к .nupkg для подзависимости
+                sub_package_path = f"{dep}.{version}.nupkg"
+                # Попытка извлечь подзависимости для текущей зависимости
+                if os.path.exists(sub_package_path):  # Проверка, существует ли файл подзависимости
+                    # Рекурсивное извлечение подзависимостей с учетом глубины
+                    sub_dependencies = self.extract_dependencies(sub_package_path, depth=depth + 1)
+                    edges[dep].extend(sub_dependencies.keys())  # Добавление подзависимостей в список
+                    # Для каждой подзависимости добавляем узел в граф
+                    for sub_dep, sub_version in sub_dependencies.items():
+                        if depth+1 < self.max_depth:
+                        # Добавление стрелочки от зависимости к подзависимости
+                            graph += f'    "{dep}.{version}" -> "{sub_dep}.{sub_version}";\n'  # Добавление ребра для зависимости
+                else:
+                    print(f"Предупреждение: подзависимость '{sub_package_path}' не найдена.")  # Вывод предупреждения, если файл не найден
+        graph += "}\n"  # Закрытие графа.
+        return graph  # Возврат сгенерированного графа.
     # Метод для визуализации графа.
     def visualize(self):  
         
