@@ -73,7 +73,11 @@ class DependencyVisualizer:  # Определение класса DependencyVis
         return graph  # Возврат сгенерированного графа.
     # Метод для визуализации графа.
     def visualize(self):  
-        
+        dependencies = self.extract_dependencies(self.package_path)  # Извлечение зависимостей из указанного пакета
+        graph_code = self.generate_graph(dependencies)  # Генерация графа в формате DOT
+        print(graph_code)  # Вывод графа на экран
+        with open(self.output_path, 'w') as f:  # Открытие файла для записи графа
+            f.write(graph_code)  # Запись графа в файл
 # Главная функция программы.
 def main(): 
     
